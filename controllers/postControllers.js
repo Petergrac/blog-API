@@ -5,6 +5,7 @@ async function getAllPosts(req, res, next) {
   try {
     const posts = await database.getAllPosts();
     if (posts) res.status(200).json(posts);
+
   } catch (error) {
     console.log("This error happened in getAllPost middleware", error.message);
     next(error);
@@ -24,10 +25,7 @@ async function addPost(req, res, next) {
       return res.status(204).json({ message: "Some fields are empty" });
     }
     // Allow addition of post
-    let shared = null;
-    if (sharedString === "true" || sharedString === "false") {
-      shared = Boolean(sharedString);
-    }
+    const shared = false;
     const author = req.user.id;
     const post = { title, content, imageUrl, shared, status, author };
     const newPost = await database.addAPost(post);
@@ -39,6 +37,33 @@ async function addPost(req, res, next) {
       "This error happened in the addPost middleware",
       error.message
     );
+    next(error);
+  }
+}
+// Get published posts for a particular author
+async function getAuthorPublishedPost(req,res,next) {
+  try {
+    // Check role of the user
+    if (req.user.role && req.user.role === "USER") {
+      return res
+        .status(401)
+        .json({ message: "Only Authors & Admin can access the posts." });
+    }
+    // Verifying the owner
+    const author = req.user.id;
+    if (!author) {
+      return res
+        .status(401)
+        .json({ message: "You are not authorized.Please log in or sign up" });
+    }
+    // Get all published posts
+    const posts = await database.authorsPublishedPosts(author);
+    if (!posts.length > 0) {
+      return res.status(404).json({ message: "No posts", posts });
+    }
+    return res.status(200).json({ message: "Your posts", posts });
+  } catch (error) {
+    console.error("Error happened in author's middleware", error.message);
     next(error);
   }
 }
@@ -86,6 +111,7 @@ async function getPostsById(req, res, next) {
 
     // Serve it only if it is PUBLISHED
     if (post.status === "PUBLISHED") {
+      console.log(post);
       return res.status(200).json({ message: "The post", post });
     }
     return res
@@ -205,6 +231,7 @@ module.exports = {
   getDraftPosts,
   getPostsById,
   getDraftById,
+  getAuthorPublishedPost,
   publishPost,
   patchPost,
   deletePost,

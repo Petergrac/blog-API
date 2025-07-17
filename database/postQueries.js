@@ -59,6 +59,16 @@ async function getPostById(postId) {
   });
   return post;
 }
+// Get authors published posts
+async function authorsPublishedPosts(author) {
+  const posts = await prisma.post.findMany({
+    where: {
+      authorId: author,
+      status: "PUBLISHED",
+    },
+  });
+  return posts;
+}
 //
 // ================================= PATCH/UPDATE POST  =========================
 //
@@ -112,6 +122,7 @@ module.exports = {
   getAllPosts,
   getAllDraftPosts,
   getPostById,
+  authorsPublishedPosts,
   publishPost,
   updatePost,
   deletePost,
