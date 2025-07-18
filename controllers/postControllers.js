@@ -5,7 +5,6 @@ async function getAllPosts(req, res, next) {
   try {
     const posts = await database.getAllPosts();
     if (posts) res.status(200).json(posts);
-
   } catch (error) {
     console.log("This error happened in getAllPost middleware", error.message);
     next(error);
@@ -41,7 +40,7 @@ async function addPost(req, res, next) {
   }
 }
 // Get published posts for a particular author
-async function getAuthorPublishedPost(req,res,next) {
+async function getAuthorPublishedPost(req, res, next) {
   try {
     // Check role of the user
     if (req.user.role && req.user.role === "USER") {
@@ -59,7 +58,7 @@ async function getAuthorPublishedPost(req,res,next) {
     // Get all published posts
     const posts = await database.authorsPublishedPosts(author);
     if (!posts.length > 0) {
-      return res.status(404).json({ message: "No posts", posts });
+      return res.status(200).json({ message: "No posts", posts: [] });
     }
     return res.status(200).json({ message: "Your posts", posts });
   } catch (error) {
@@ -86,7 +85,7 @@ async function getDraftPosts(req, res, next) {
     // Get all drafts
     const drafts = await database.getAllDraftPosts(author);
     if (!drafts.length > 0) {
-      return res.status(404).json({ message: "No Drafts" });
+      return res.status(200).json({ message: "No Drafts",drafts: [] });
     }
     return res.status(200).json({ message: "Your Drafts", drafts });
   } catch (error) {
@@ -99,7 +98,6 @@ async function getDraftPosts(req, res, next) {
 async function getPostsById(req, res, next) {
   try {
     const { id } = req.params;
-    console.log(id);
     // Retrieving Id
     if (!id) return res.status(404).json({ message: "Post not found" });
     // Get the post by id
@@ -111,8 +109,7 @@ async function getPostsById(req, res, next) {
 
     // Serve it only if it is PUBLISHED
     if (post.status === "PUBLISHED") {
-      console.log(post);
-      return res.status(200).json({ message: "The post", post });
+      return res.status(200).json({ post });
     }
     return res
       .status(401)
@@ -134,7 +131,7 @@ async function getDraftById(req, res, next) {
     if (post) {
       if (req.user) {
         if (req.user.role === "AUTHOR" || req.user.role === "ADMIN") {
-          return res.status(200).json({ message: "Your post", post });
+          return res.status(200).json({ post });
         }
         return res
           .status(401)
@@ -166,6 +163,9 @@ async function patchPost(req, res, next) {
     let ifShared = null;
     if (shared === "true" || shared === "false") {
       ifShared = Boolean(shared);
+    }
+    else{
+      ifShared = false;
     }
 
     // Update the database
