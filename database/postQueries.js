@@ -26,9 +26,9 @@ async function getAllPosts() {
     include: {
       comments: true,
     },
-    orderBy:{
-      likes: "desc"
-    }
+    orderBy: {
+      likes: "desc",
+    },
   });
   return posts;
 }
@@ -54,7 +54,21 @@ async function getPostById(postId) {
       id: postId,
     },
     include: {
-      comments: true,
+      author: {
+        select: {
+          username: true,
+        },
+      },
+      comments: {
+        include: {
+          user: {
+            select: { username: true },
+          },
+        },
+        orderBy:{
+          likes: 'desc'
+        }
+      },
     },
   });
   return post;

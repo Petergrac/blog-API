@@ -15,12 +15,11 @@ const addUser = [
         field: error.path,
         message: error.msg,
       }));
-      return res.status(400).json({ errors: formattedErrors });
+      return res.status(200).json({ errors: formattedErrors });
     }
     // Fields
     const { username: name, email, password, role } = req.body;
     // Hash the password
-
     try {
       const hash = await bcrypt.hash(password, 10);
       const user = await database.addUser(name, email, hash, role);
@@ -44,12 +43,12 @@ async function login(req, res, next) {
     // Check email
     const user = await database.getUserByEmail(email);
     if (!user) {
-      return res.status(404).json({ message: "Incorrect email" });
+      return res.status(200).json({ message: "Incorrect email" });
     }
     // Confirm Password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      return res.status(401).json({ message: "Incorrect Password" });
+      return res.status(200).json({ message: "Incorrect Password" });
     }
     // Generate the token
     const token = jwt.sign(

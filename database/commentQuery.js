@@ -19,16 +19,6 @@ async function addCommentToPost(comment, postId, owner) {
   }
 }
 
-//  =========================== READ COMMENT ========================
-//
-async function getPostComment(postId) {
-  const comments = await prisma.comment.findMany({
-    where: {
-      postId: postId,
-    },
-  });
-  return comments;
-}
 // ============================= UPDATE COMMENT ========================
 //
 async function updateComment(content, commentId, ownerId) {
@@ -63,7 +53,6 @@ async function deleteComment(commentId, ownerId) {
 }
 module.exports = {
   addCommentToPost,
-  getPostComment,
   updateComment,
   deleteComment,
 };

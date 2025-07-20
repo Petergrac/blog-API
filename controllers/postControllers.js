@@ -104,7 +104,7 @@ async function getPostsById(req, res, next) {
     const post = await database.getPostById(id);
     // Check if post exist
     if (!post)
-      return res.status(404).json({ message: "This post does not exist" });
+      return res.status(200).json({ message: "This post does not exist" });
     // Verify the authorized client
 
     // Serve it only if it is PUBLISHED

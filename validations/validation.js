@@ -27,20 +27,6 @@ const validate = [
     .isAlphanumeric()
     .withMessage("Password must be alphanumeric")
     .bail(),
-  body("check_password")
-    .trim()
-    .isLength({ min: 6, max: 10 })
-    .withMessage("Confirm password must be between 6 and 10 characters")
-    .bail()
-    .isAlphanumeric()
-    .withMessage("Confirm password must be alphanumeric")
-    .custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords do not match");
-      }
-      return true;
-    })
-    .bail(),
 ];
 
 module.exports = validate;

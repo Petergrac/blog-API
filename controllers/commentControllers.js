@@ -4,14 +4,15 @@ const commentDb = require("../database/commentQuery");
 async function addComment(req, res, next) {
   try {
     const { postId } = req.params;
-    const { content: comment } = req.body;
+    const { comment } = req.body;
     const owner = req.user.id;
+    console.log(owner);
     if (!owner)
       return res
-        .status(401)
+        .status(200)
         .json({ message: "You are not authorized to comment" });
     if (comment === "") {
-      return res.status(404).json({ message: "Comment not found" });
+      return res.status(200).json({ message: "Comment should not be empty" });
     } //   Add it to the database
     const newComment = await commentDb.addCommentToPost(comment, postId, owner);
     if (newComment) {
@@ -24,22 +25,6 @@ async function addComment(req, res, next) {
   }
 }
 
-// Get all comments for specific post
-async function allComments(req, res, next) {
-  try {
-    const { postId } = req.params;
-    if (!postId) {
-      return res.status(404).json({ message: "Post not found" });
-    }
-    const comments = await commentDb.getPostComment(postId);
-    if (comments) {
-      return res.status(200).json({ comments });
-    }
-  } catch (error) {
-    console.error("Could not get the comments", error.message);
-    next(error);
-  }
-}
 // Patch a comment
 async function patchComment(req, res, next) {
   try {
@@ -47,7 +32,7 @@ async function patchComment(req, res, next) {
     const userId = req.user.id;
     const { content } = req.body;
     if (!commentId && !userId) {
-      return res.status(404).json({ message: "Comment not found" });
+      return res.status(200).json({ message: "Comment not found" });
     }
     if (content === "") {
       return res.status(204).json({ message: "Content Can't be empty" });
@@ -71,7 +56,7 @@ async function deleteComment(req, res, next) {
     const { commentId } = req.params;
     const userId = req.user.id;
     if (!commentId && !userId) {
-      return res.status(404).json({ message: "Comment not found" });
+      return res.status(200).json({ message: "Comment not found" });
     }
     const isDone = await commentDb.deleteComment(commentId, userId);
 
@@ -88,7 +73,6 @@ async function deleteComment(req, res, next) {
 
 module.exports = {
   addComment,
-  allComments,
   patchComment,
   deleteComment,
 };

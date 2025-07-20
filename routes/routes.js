@@ -12,7 +12,6 @@ const router = new Router();
 //
 router.post("/api/register", userControl.addUser);
 // Login route
-
 router.post("/api/login/", userControl.login);
 //
 // ========================== POST ROUTES ========================
@@ -47,9 +46,6 @@ router.delete("/api/posts/:id", authenticateJwt, postControl.deletePost);
 // ===========================   COMMENTS ROUTES ==================
 //
 // Add comments to a post
-router.get("/api/posts/:postId/comments", commentController.allComments);
-
-// View comments to a post
 router.post(
   "/api/posts/:postId/comments",
   authenticateJwt,
@@ -62,7 +58,6 @@ router.patch(
   authenticateJwt,
   commentController.patchComment
 );
-
 router.delete(
   "/api/comments/:commentId",
   authenticateJwt,

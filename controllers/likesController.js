@@ -7,7 +7,7 @@ async function addLikeToPost(req, res, next) {
     // Check if the user has already liked
     const hasLiked = await likesShareDb.getPostLikers(id, req.user.id);
     if (hasLiked) {
-      return res.status(409).json({ message: "Post already liked" });
+      return res.status(200).json({ message: "Post already liked" });
     }
     // Update both tables
     const likedPost = await likesShareDb.likePost(id);
@@ -30,9 +30,8 @@ async function likeComment(req, res, next) {
     const { id: commentId } = req.params;
     // Check if the user has already liked 
     const hasLiked = await likesShareDb.getCommentLikers(commentId, req.user.id);
-    console.log(hasLiked);
     if(hasLiked){
-        return res.status(409).json({message:'Comment already liked'});
+        return res.status(200).json({message:'Comment already liked'});
     }
     // Update both tables
     const updatedComment = await likesShareDb.likeComment(commentId);
