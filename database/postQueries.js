@@ -25,6 +25,11 @@ async function getAllPosts() {
     },
     include: {
       comments: true,
+      author:{
+        select:{
+          username: true
+        }
+      }
     },
     orderBy: {
       likes: "desc",
