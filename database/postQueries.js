@@ -62,12 +62,12 @@ async function getPostById(postId) {
       comments: {
         include: {
           user: {
-            select: { username: true },
+            select: { username: true,id: true},
           },
         },
-        orderBy:{
-          likes: 'desc'
-        }
+        orderBy: {
+          likes: "desc",
+        },
       },
     },
   });
