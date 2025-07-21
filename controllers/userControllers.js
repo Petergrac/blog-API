@@ -42,7 +42,8 @@ async function login(req, res, next) {
     const { email, password } = req.body;
     // Check email
     const user = await database.getUserByEmail(email);
-    if (!user) {
+
+    if (user === null) {
       return res.status(200).json({ message: "Incorrect email" });
     }
     // Confirm Password

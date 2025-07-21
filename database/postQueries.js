@@ -85,6 +85,13 @@ async function authorsPublishedPosts(author) {
       authorId: author,
       status: "PUBLISHED",
     },
+    include:{
+      _count:{
+        select:{
+          comments: true
+        }
+      }
+    }
   });
   return posts;
 }
@@ -100,6 +107,11 @@ async function publishPost(id, ownerId) {
     data: {
       status: "PUBLISHED",
     },
+    include:{
+      _count:{
+        comments: true
+      }
+    }
   });
   return post;
 }
