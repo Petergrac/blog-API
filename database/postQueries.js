@@ -114,11 +114,6 @@ async function publishPost(id, ownerId) {
     data: {
       status: "PUBLISHED",
     },
-    include:{
-      _count:{
-        comments: true
-      }
-    }
   });
   return post;
 }
