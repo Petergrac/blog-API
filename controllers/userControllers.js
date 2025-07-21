@@ -64,8 +64,38 @@ async function login(req, res, next) {
     next(error);
   }
 }
-
+// Get user by id
+async function getUserById(req, res, next) {
+  try {
+    const { id: userId } = req.params;
+    if (!userId) return res.status(200).json({ message: "Id cannot be empty" });
+    const user = await database.getUserById(userId);
+    if (!user) return res.status(200).json({ message: "User does not exist" });
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Could not fetch the user", error.message);
+    next(error);
+  }
+}
+// Update user info
+async function updateUserInfo(req, res, next) {
+  try {
+    const { id: userId } = req.params;
+    const updates = req.body;
+    const user = await database.updateUserData(userId, updates.updatedFields);
+    if (!user)
+      return res
+        .status(200)
+        .json({ message: "User info could not be updated" });
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.log("User data could not be updated", error.message);
+    next(error);
+  }
+}
 module.exports = {
   addUser,
   login,
+  getUserById,
+  updateUserInfo,
 };

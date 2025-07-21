@@ -5,7 +5,7 @@ async function getMyInfo(req, res, next) {
   try {
     const userId = req.user.id;
     if (!userId) {
-      res.status(404).json({ message: "No data found. Login" });
+      res.status(200).json({ message: "No data found. Login" });
     }
     if (req.user.role !== "ADMIN") {
       return res.status(400).json({ message: "Cant access this route" });

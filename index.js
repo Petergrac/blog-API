@@ -43,4 +43,4 @@ app.use((error, req, res, next) => {
 
 
 // Listening
-app.listen(port,()=> console.log(`Serving on http://localhost:${port}`));
+app.listen(port,'0.0.0.0',()=> console.log(`Serving on http://localhost:${port}`));

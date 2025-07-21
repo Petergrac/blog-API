@@ -4,6 +4,7 @@ const database = require("../database/postQueries");
 async function getAllPosts(req, res, next) {
   try {
     const posts = await database.getAllPosts();
+    if(!posts) return res.status(200).json({message: 'No Posts'});
     if (posts) res.status(200).json(posts);
   } catch (error) {
     console.log("This error happened in getAllPost middleware", error.message);

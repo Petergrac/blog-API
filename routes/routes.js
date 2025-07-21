@@ -13,11 +13,16 @@ const router = new Router();
 router.post("/api/register", userControl.addUser);
 // Login route
 router.post("/api/login/", userControl.login);
+// Get user info
+router.get("/api/me/:id", authenticateJwt, userControl.getUserById);
+// Edit user info
+router.patch("/api/users/:id", authenticateJwt, userControl.updateUserInfo);
 //
 // ========================== POST ROUTES ========================
 //
 // Create  a post
 router.post("/api/posts", authenticateJwt, postControl.addPost);
+
 //  Get all published posts
 router.get("/api/posts", postControl.getAllPosts);
 
