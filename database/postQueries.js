@@ -45,6 +45,13 @@ async function getAllDraftPosts(author) {
         status: "DRAFT",
         authorId: author,
       },
+      include:{
+      _count:{
+        select:{
+          comments: true
+        }
+      }
+    }
     });
     return drafts;
   } catch (error) {
