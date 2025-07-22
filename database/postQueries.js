@@ -27,7 +27,8 @@ async function getAllPosts() {
       comments: true,
       author:{
         select:{
-          username: true
+          username: true,
+          avatar: true
         }
       }
     },
@@ -69,6 +70,7 @@ async function getPostById(postId) {
       author: {
         select: {
           username: true,
+          avatar: true
         },
       },
       comments: {
