@@ -186,7 +186,6 @@ async function publishPost(req, res, next) {
   try {
     const { id } = req.params;
     const ownerId = req.user.id;
-    console.log(ownerId, id);
     if (ownerId && id) {
       const publishPost = await database.publishPost(id, ownerId);
       if (publishPost) {

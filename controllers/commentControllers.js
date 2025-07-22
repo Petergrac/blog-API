@@ -6,7 +6,6 @@ async function addComment(req, res, next) {
     const { postId } = req.params;
     const { comment } = req.body;
     const owner = req.user.id;
-    console.log(owner);
     if (!owner)
       return res
         .status(200)
