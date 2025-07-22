@@ -211,7 +211,7 @@ async function deletePost(req, res, next) {
     const { id } = req.params;
     const ownerId = req.user.id;
     if (!id && !ownerId) {
-      return res.status(401).json({ message: "You are unauthorized" });
+      return res.sendStatus(401);
     }
     const isDone = await database.deletePost(id, ownerId);
     if (isDone) {

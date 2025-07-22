@@ -51,17 +51,43 @@ async function login(req, res, next) {
     if (!isValid) {
       return res.status(200).json({ message: "Incorrect Password" });
     }
-    // Generate the token
-    const token = jwt.sign(
+    // Generate access token
+    const accessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.SECRET_KEY,
       {
-        expiresIn: "1hr",
+        expiresIn: "15m",
       }
     );
-    res.status(202).json({ message: "Logged In Successfully", token });
+    // Generate refresh token
+    const refreshToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.REFRESH_TOKEN_KEY,
+      { expiresIn: "7d" }
+    );
+    res.json({ accessToken,refreshToken });
   } catch (error) {
-    console.error("Error in the login middleware", error.message);
+    console.error("Could not generate the tokens.", error.message);
+    next(error);
+  }
+}
+
+// Refresh token
+async function refreshToken(req, res, next) {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.sendStatus(401);
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY, (err, user) => {
+      if (err) return res.sendStatus(403);
+      const newAccessToken = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.SECRET_KEY,
+        { expiresIn: "15m" }
+      );
+      res.json({ accessToken: newAccessToken });
+    });
+  } catch (error) {
+    console.error("Could not serve new accessToken", error.message);
     next(error);
   }
 }
@@ -99,4 +125,5 @@ module.exports = {
   login,
   getUserById,
   updateUserInfo,
+  refreshToken,
 };

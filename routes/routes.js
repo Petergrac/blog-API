@@ -17,6 +17,8 @@ router.post("/api/login/", userControl.login);
 router.get("/api/me/:id", authenticateJwt, userControl.getUserById);
 // Edit user info
 router.patch("/api/users/:id", authenticateJwt, userControl.updateUserInfo);
+// Refresh user's access token
+router.post("/api/refresh", userControl.refreshToken);
 //
 // ========================== POST ROUTES ========================
 //
