@@ -20,55 +20,76 @@ enum PostStatus {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  username   String
-  email      String   @unique
-  password   String
-  avatar     String?
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  bio        String?
-  
-  posts      Post[]   @relation("UserPosts")
-  comments   Comment[]
+  id            String            @id @default(uuid())
+  username      String
+  email         String            @unique
+  password      String
+  avatar        String?
+  role          Role              @default(USER)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  bio           String?
+
+  posts         Post[]            @relation("UserPosts")
+  likedPosts    LikesOnPosts[]
+  likedComments LikesOnComments[]
+  comments      Comment[]
 }
 
 model Post {
-  id         String      @id @default(uuid())
+  id         String     @id @default(uuid())
   title      String
   content    String
   imageUrl   String?
-  likes      Int         @default(0)
-  shared     Boolean     @default(false)
-  status     PostStatus  @default(DRAFT) // 👈 Controls visibility
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  likes      Int        @default(0)
+  shared     Boolean    @default(false)
+  status     PostStatus @default(DRAFT)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   authorId   String
 
-  author     User        @relation("UserPosts", fields: [authorId], references: [id])
+  author     User       @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
 
   comments   Comment[]
+  likers     LikesOnPosts[]
 }
 
 model Comment {
-  id         String    @id @default(uuid())
+  id         String          @id @default(uuid())
   content    String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  likes      Int       @default(0)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  likes      Int             @default(0)
 
   postId     String
   userId     String
 
-  post       Post      @relation(fields: [postId], references: [id])
-  user       User      @relation(fields: [userId], references: [id])
+  post       Post            @relation(fields: [postId], references: [id] , onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  likers     LikesOnComments[]
 }
 
-model Likes{
-  id String @default(uuid()) @unique
-  postId String?
-  postLikes String?
-  commentId String?
-  commentLikes String? 
+// Junction tables
+model LikesOnPosts {
+  userId     String
+  postId     String
+  assignedAt DateTime @default(now())
+
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  @@id([userId, postId])
 }
+
+model LikesOnComments {
+  userId     String
+  commentId  String
+  assignedAt DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId]) 
+}
+

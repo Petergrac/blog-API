@@ -62,7 +62,7 @@ async function deleteComment(req, res, next) {
     if (isDone) {
       return res.status(200).json({ message: "Comment deleted" });
     }
-    return res.status(400).json({ message: "Comment could not be deleted" });
+    return res.sendStatus(500)
   } catch (error) {
     res.status(200).json({ message: "Comment deleted" });
     console.error("Could not delete the comment");

@@ -3,21 +3,27 @@ const likesShareDb = require("../database/sharesLikesQuery");
 // Like a post
 async function addLikeToPost(req, res, next) {
   const { id } = req.params;
+  const userId = req.user.id;
+  if (!userId) return res.sendStatus(401);
   try {
     // Check if the user has already liked
-    const hasLiked = await likesShareDb.getPostLikers(id, req.user.id);
+    const hasLiked = await likesShareDb.getUsersWhoLikePost(id, userId);
     if (hasLiked) {
-      return res.status(200).json({ message: "Post already liked" });
+      // Dislike the post
+      const updatedPost = await likesShareDb.togglePostLike(
+        id,
+        userId,
+        Boolean(false)
+      );
+      return res.status(200).json({ updatedPost });
     }
-    // Update both tables
-    const likedPost = await likesShareDb.likePost(id);
-    const addUserLike = await likesShareDb.postLikers(id, req.user.id);
-    if (!likedPost && addUserLike) {
-      return res
-        .status(401)
-        .json({ message: "Could not update the post likes" });
-    };
-    return res.status(200).json({ likedPost });
+    // Like the post
+    const updatedPost = await likesShareDb.togglePostLike(
+      id,
+      userId,
+      Boolean(true)
+    );
+    return res.status(200).json({ updatedPost });
   } catch (error) {
     console.error("Could not add like to the post", error.message);
     next(error);
@@ -28,20 +34,32 @@ async function addLikeToPost(req, res, next) {
 async function likeComment(req, res, next) {
   try {
     const { id: commentId } = req.params;
-    // Check if the user has already liked 
-    const hasLiked = await likesShareDb.getCommentLikers(commentId, req.user.id);
-    if(hasLiked){
-        return res.status(200).json({message:'Comment already liked'});
+    const userId = req.user.id;
+    if (!userId) return res.sendStatus(401);
+    // Toggle comments based on the records
+    const hasLiked = await likesShareDb.getUsersWhoLikeComment(
+      commentId,
+      userId
+    );
+
+    if (hasLiked) {
+      // Dislike the comment
+      const updatedComment = await likesShareDb.toggleCommentLike(
+        commentId,
+        userId,
+        Boolean(false)
+      );
+      return res.status(200).json({ updatedComment });
     }
-    // Update both tables
-    const updatedComment = await likesShareDb.likeComment(commentId);
-    const commentLiker = await likesShareDb.commentLikers(commentId, req.user.id);
-    if (!updatedComment && !commentLiker) {
-      return res.status(401).json({ message: "Could not add the like" });
-    };
+    // Like a comment
+    const updatedComment = await likesShareDb.toggleCommentLike(
+      commentId,
+      userId,
+      Boolean(true)
+    );
     return res.status(200).json({ updatedComment });
   } catch (error) {
-    console.error("Could not update the comment's likes ", error.message);
+    console.error("Could not update the comment likes", error.message);
     next(error);
   }
 }

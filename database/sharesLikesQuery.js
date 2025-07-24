@@ -1,29 +1,85 @@
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 
-// Like a post
-async function likePost(postId) {
-  const likedPost = await prisma.post.update({
-    where: {
-      id: postId,
-    },
-    data: {
-      likes: { increment: 1 },
-    },
-  });
-  return likedPost;
+// Add or remove a like on a post
+async function togglePostLike(postId, userId, like) {
+  let updatedPost;
+  if (like) {
+    await prisma.$transaction(async (prisma) => {
+      await prisma.likesOnPosts.create({
+        data: {
+          userId: userId,
+          postId: postId,
+        },
+      });
+      updatedPost = await prisma.post.update({
+        where: { id: postId },
+        data: { likes: { increment: 1 } },
+      });
+    });
+  } else {
+    await prisma.$transaction(async (prisma) => {
+      await prisma.likesOnPosts.deleteMany({
+        where: {
+          userId: userId,
+          postId: postId,
+        },
+      });
+      updatedPost = await prisma.post.update({
+        where: { id: postId },
+        data: { likes: { decrement: 1 } },
+      });
+    });
+  }
+  return updatedPost;
 }
-// Like a comment
-async function likeComment(commentId) {
-  const updatedComment = await prisma.comment.update({
-    where: {
-      id: commentId,
-    },
-    data: {
-      likes: { increment: 1 },
-    },
-  });
-  return updatedComment;
+// Add or remove a like on a comment
+async function toggleCommentLike(commentId, userId, like) {
+  let updatedComment;
+  if (like) {
+    // Add record & increment like
+    await prisma.$transaction(async (prisma) => {
+      // Add record
+      await prisma.likesOnComments.create({
+        data: {
+          commentId: commentId,
+          userId: userId,
+        },
+      });
+      // Increment a like
+      updatedComment = await prisma.comment.update({
+        where: {
+          id: commentId,
+        },
+        data: {
+          likes: { increment: 1 },
+        },
+      });
+    });
+    return updatedComment;
+  } else {
+    // Decrement a like in comment and remove record
+    await prisma.$transaction(async (prisma) => {
+      // Remove the record
+      await prisma.likesOnComments.deleteMany({
+        where: {
+          commentId: commentId,
+          userId,
+        },
+      });
+
+      //  Decrement a like
+      updatedComment = await prisma.comment.update({
+        where: {
+          id: commentId,
+        },
+        data: {
+          likes: { decrement: 1 },
+        },
+      });
+    });
+    return updatedComment;
+  }
 }
 // Share a post
 async function sharePost(postId, shareStatus) {
@@ -37,51 +93,35 @@ async function sharePost(postId, shareStatus) {
   });
   return sharedPost;
 }
-// Track user who likes post
-async function postLikers(postId, postLiker) {
-  const user = await prisma.likes.create({
-    data: {
-      postLikes: postLiker,
-      postId: postId,
-    },
-  });
-}
-// Track user who likes comments
-async function commentLikers(id, likerId) {
-  const commentLiker = await prisma.likes.create({
-    data: {
-      commentId: id,
-      commentLikes: likerId,
-    },
-  });
-  return commentLiker;
-}
+
 // Get users who likes a post
-async function getPostLikers(postId, userId) {
-  const isAvailable = await prisma.likes.findMany({
+async function getUsersWhoLikePost(postId, userId) {
+  const likedRecord = await prisma.likesOnPosts.findUnique({
     where: {
-      postId: postId,
-      postLikes: userId,
+      userId_postId: {
+        postId: postId,
+        userId: userId,
+      },
     },
   });
-  return isAvailable.length > 0;
+  return !!likedRecord;
 }
 // Get users who likes a comment
-async function getCommentLikers(commentId, userId) {
-  const isAvailable = await prisma.likes.findMany({
+async function getUsersWhoLikeComment(commentId, userId) {
+  const likedRecord = await prisma.likesOnComments.findUnique({
     where: {
-      commentId: commentId,
-      commentLikes: userId,
+      userId_commentId: {
+        commentId: commentId,
+        userId: userId,
+      },
     },
   });
-  return isAvailable.length > 0;
+  return !!likedRecord;
 }
 module.exports = {
-  likePost,
-  likeComment,
+  togglePostLike,
+  toggleCommentLike,
   sharePost,
-  postLikers,
-  commentLikers,
-  getPostLikers,
-  getCommentLikers,
+  getUsersWhoLikePost,
+  getUsersWhoLikeComment,
 };
